@@ -1,5 +1,5 @@
 from PyInquirer import prompt
-from expenseReportRepository import post_new_expense, fetch_expense
+from expenseReportRepository import post_new_expense, fetch_expense, update_expense_refound
 from userRepository import fetch_user
 
 
@@ -16,12 +16,6 @@ def fill_payback_expense_questions(userBuyer):
             multipleChoiceUsers.append({'name':user})
     payback_expense_questions[0]['choices'] = multipleChoiceUsers
     return True
-
-def fill_refound():
-    users = fetch_user()
-    refund_questions[1]['choices'] = users
-    return True
-
 
 expense_questions = [
     {
@@ -75,6 +69,39 @@ def new_expense(*args):
     # print("Expense Added !")
     return True
 
+
+def get_expense_report_by_name(name):
+    debt_user = []
+    users = fetch_user()
+    expenses = fetch_expense()
+    matrix = []
+    for r in range(0, len(users)):
+        matrix.append([0 for c in range(0, len(users))])
+    for expense in expenses:
+        spender = expense['Spender']
+        payback = expense['Payback']
+        spenderindex = users.index(spender)
+        paybackindex = users.index(payback)
+        amount = float(expense['Amount'])
+        # print( "spenderindex: " + str(spenderindex) + " paybackindex: " + str(paybackindex) + " amount: " + str(amount))
+        matrix[spenderindex][paybackindex] += amount
+    # print(matrix)
+
+    # Affichage des dettes
+    for i in range(len(users)):
+        for j in range(len(users)):
+            if matrix[i][j] > 0:
+                if matrix[j][i] > 0:
+                    difference = matrix[i][j] - matrix[j][i]
+                    if difference > 0:
+                        if (users[j] == name):
+                            debt_user.append({'name':users[i], 'amount':difference})
+                else:
+                    if (users[j] == name):
+                        debt_user.append({'name':users[i], 'amount':matrix[i][j]})
+    return debt_user
+
+
     
 
 def get_expense_report():
@@ -110,6 +137,13 @@ def get_expense_report():
 
     # print(matrix)
 
+def fill_refound():
+    users = fetch_user()
+    print(users)
+    refund_questions[0]['choices'] = users
+    return True
+
+
 refund_questions = [
     {
         "type":"list",
@@ -119,8 +153,7 @@ refund_questions = [
     }
 ]
 
-def fill_refound_user_questions():
-    users = fetch_user()
+def fill_refound_user(users):
     refound_user_questions[0]['choices'] = users
     return True
 
@@ -136,11 +169,24 @@ refound_user_questions = [
 
 def refound_debt():
     fill_refound()
-    type_of_refund = prompt(refund_questions)
-    if (type_of_refund['whichRefound']) == "Refund a person":
-        print("Refund a person")
-        # TODO
-    if (type_of_refund['whichRefound']) == "Refund for an expense":
-        print("Refund for an expense")
-        # TODO
-    return
+    user = prompt(refund_questions)
+    print(user)
+    main_user = user['user']
+    debt = get_expense_report_by_name(user['user'])
+    print(debt)
+    user_refoundable = []
+    for user in debt:
+        user_refoundable.append(user['name'])
+    if (user_refoundable == []):
+        print("You don't have any debt to refund")
+        return False
+    print(user_refoundable)
+
+    fill_refound_user(user_refoundable)
+    refoundUser = prompt(refound_user_questions)
+    print(refoundUser)
+    refoundUser = refoundUser['refoundUser']
+
+    update_expense_refound(refoundUser, main_user)
+
+

@@ -22,7 +22,7 @@ def ask_option():
     if (option['main_options']) == "Show Status":
         # print("Show Status")
         get_expense_report()
-        # refound_debt()
+        refound_debt()
         ask_option()
 
 def main():
