@@ -1,0 +1,7 @@
+Amount,Label,Spender,Payback, Refound
+8,Pizz,Arnaud,Dupont,False
+8,Pizz,Arnaud,Thomas,False
+18.0,BK,Dupont,Arnaud,False
+10.0,Kebab,Arnaud,Dupont,False
+10.0,Kebab,Arnaud,Thomas,False
+10.0,Kebab,Arnaud,Paul,False
